@@ -1,0 +1,169 @@
+#include <iostream>
+#include <string>
+using namespace std;
+const int MAX_BOOKS = 100;
+const int MAX_BORROWERS = 100;
+struct Book {
+    string title;
+    string author;
+    string ISBN;
+    bool isAvailable;
+};
+struct Borrower {
+    string name;
+    string borrowedISBN;
+    int overdueDays;
+};
+class Library {
+private:
+    Book book[MAX_BOOKS];
+    Borrower borrower[MAX_BORROWERS];
+    int bookCount;
+    int borrowerCount;
+public:
+    Library() : bookCount(0), borrowerCount(0) {}
+    void addBook(const string& title, const string& author, const string& ISBN) {
+        if (bookCount >= MAX_BOOKS) {
+            cout << "The library is at maximum capacity. Cannot add more books.\n";
+            return;
+        }
+        book[bookCount++] = {title, author, ISBN, true};
+        cout << "Book added successfully.\n";
+    }
+    void searchBook(const string& query) const {
+        bool found = false;
+        for (int i = 0; i < bookCount; ++i) {
+            if (book[i].title.find(query) != string::npos || 
+                book[i].author.find(query) != string::npos || 
+                book[i].ISBN == query) {
+                cout << "Title: " << book[i].title << ", Author: " << book[i].author
+                     << ", ISBN: " << book[i].ISBN << ", Available: "
+                     << (book[i].isAvailable ? "Yes" : "No") << "\n";
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "No book found matching the given details.\n";
+        }
+    }
+    void checkoutBook(const string& borrowerName, const string& ISBN) {
+        for (int i = 0; i < bookCount; ++i) {
+            if (book[i].ISBN == ISBN) {
+                if (!book[i].isAvailable) {
+                    cout << "Book is already checked out.\n";
+                    return;
+                }
+                if (borrowerCount >= MAX_BORROWERS) {
+                    cout << "Cannot check out more books. Maximum borrower limit reached.\n";
+                    return;
+                }
+                book[i].isAvailable = false;
+                borrower[borrowerCount++] = {borrowerName, ISBN, 0};
+                cout << "Book checked out successfully.\n";
+                return;
+            }
+        }
+        cout << "Book not found.\n";
+    }
+    void returnBook(const string& borrowerName, const string& ISBN, int overdueDays) {
+        for (int i = 0; i < borrowerCount; ++i) {
+            if (borrower[i].name == borrowerName && borrower[i].borrowedISBN == ISBN) {
+                for (int j = 0; j < bookCount; ++j) {
+                    if (book[j].ISBN == ISBN) {
+                        book[j].isAvailable = true;
+                        cout << "Book returned successfully.\n";
+                        if (overdueDays > 0) {
+                            double fine = overdueDays * 2.0;
+                            cout << "Overdue fine: $" << fine << "\n";
+                        }
+                        for (int k = i; k < borrowerCount - 1; ++k) {
+                            borrower[k] = borrower[k + 1];
+                        }
+                        --borrowerCount;
+                        return;
+                    }
+                }
+            }
+        }
+        cout << "Checkout properly! Borrower or book not found.\n";
+    }
+    void viewBooks() const {
+        cout << "Library Books:\n";
+        for (int i = 0; i < bookCount; ++i) {
+            cout << "Title: " << book[i].title << ", Author: " << book[i].author
+                 << ", ISBN: " << book[i].ISBN << ", Available: "
+                 << (book[i].isAvailable ? "Yes" : "No") << "\n";
+        }
+    }
+    void viewBorrowers() const {
+        cout << "Borrowers:\n";
+        for (int i = 0; i < borrowerCount; ++i) {
+            cout << "Name: " << borrower[i].name << ", ISBN: " << borrower[i].borrowedISBN
+                 << ", Overdue Days: " << borrower[i].overdueDays << "\n";
+        }
+    }
+};
+int main() {
+    Library library;
+    int choice;
+    string title, author, ISBN, name;
+    int overdueDays;
+    cout << "Welcome to the Library!\n";
+    do {
+        cout << "\n1. Add Book\n";
+        cout << "2. Search Book\n";
+        cout << "3. Checkout Book\n";
+        cout << "4. Return Book\n";
+        cout << "5. View Available Books\n";
+        cout << "6. View Borrowers\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore();
+
+        switch (choice) {
+            case 1:
+                cout << "Enter title of book: ";
+                getline(cin, title);
+                cout << "Enter author of book: ";
+                getline(cin, author);
+                cout << "Enter ISBN of book: ";
+                getline(cin, ISBN);
+                library.addBook(title, author, ISBN);
+                break;
+            case 2:
+                cout << "Enter title, author, or ISBN to search: ";
+                getline(cin, title);
+                library.searchBook(title);
+                break;
+            case 3:
+                cout << "Enter name of borrower: ";
+                getline(cin, name);
+                cout << "Enter ISBM of book: ";
+                getline(cin, ISBN);
+                library.checkoutBook(name, ISBN);
+                break;
+            case 4:
+                cout << "Enter name of borrower: ";
+                getline(cin, name);
+                cout << "Enter ISBNof book: ";
+                getline(cin, ISBN);
+                cout << "Enter overdue days: ";
+                cin >> overdueDays;
+                library.returnBook(name, ISBN, overdueDays);
+                break;
+            case 5:
+                library.viewBooks();
+                break;
+            case 6:
+                library.viewBorrowers();
+                break;
+            case 7:
+                cout << "Thank you for using!\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 7);
+    return 0;
+}
