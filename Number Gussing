@@ -18,10 +18,11 @@ void guessthenumber() {
         cin >> guess;
         attempts++;
         int difference = guess - number; // Absolute difference between guess and number
+        cout<<difference<<endl;
         if (guess < number) {
-            if (difference < 5) {
+            if (difference>-5) {
                 cout << "low, but very close! Try again." << endl;
-            }else if (difference <= 15&&difference >=5 ) {
+            }else if(difference <=-5&&difference >=-15) {
                 cout << "low, but close! Try again." << endl;
             }else {
                 cout << "Too low! Try again." << endl;
